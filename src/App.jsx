@@ -319,21 +319,23 @@ function HeatmapCell({ date, data, today, onClick }) {
 
 // ─── DAILY TASKS ─────────────────────────────────────────────────────────────
 function DailyTasks({ activeDate, data, setData }) {
-  const saved = data[activeDate]?.tasks || { main: ["", "", ""], extra: [] };
-  const [main, setMain] = useState(saved.main.length === 3 ? saved.main : ["", "", ""]);
-  const [extra, setExtra] = useState(saved.extra || []);
-  const [mainDone, setMainDone] = useState(data[activeDate]?.tasksDone?.main || [false, false, false]);
-  const [extraDone, setExtraDone] = useState(data[activeDate]?.tasksDone?.extra || []);
+  const getMain = () => { const t = data[activeDate]?.tasks?.main; return t?.length === 3 ? t : ["", "", ""]; };
+  const getExtra = () => data[activeDate]?.tasks?.extra || [];
+  const getMainDone = () => { const t = data[activeDate]?.tasksDone?.main; return t?.length === 3 ? t : [false, false, false]; };
+  const getExtraDone = () => data[activeDate]?.tasksDone?.extra || [];
+
+  const [main, setMain] = useState(getMain);
+  const [extra, setExtra] = useState(getExtra);
+  const [mainDone, setMainDone] = useState(getMainDone);
+  const [extraDone, setExtraDone] = useState(getExtraDone);
   const [savePulse, setSavePulse] = useState(false);
 
   useEffect(() => {
-    const t = data[activeDate]?.tasks || { main: ["", "", ""], extra: [] };
-    const td = data[activeDate]?.tasksDone || { main: [false, false, false], extra: [] };
-    setMain(t.main?.length === 3 ? t.main : ["", "", ""]);
-    setExtra(t.extra || []);
-    setMainDone(td.main?.length === 3 ? td.main : [false, false, false]);
-    setExtraDone(td.extra || []);
-  }, [activeDate]);
+    setMain(getMain());
+    setExtra(getExtra());
+    setMainDone(getMainDone());
+    setExtraDone(getExtraDone());
+  }, [activeDate, data]);
 
   const persist = useCallback((newMain, newExtra, newMainDone, newExtraDone) => {
     setData(prev => {
@@ -437,7 +439,7 @@ function DailyNote({ activeDate, data, setData }) {
   useEffect(() => {
     setNote(data[activeDate]?.note || "");
     setEvening(data[activeDate]?.evening || "");
-  }, [activeDate]);
+  }, [activeDate, data]);
 
   const saveField = useCallback((field, val) => {
     setData(prev => {
@@ -655,7 +657,7 @@ export default function Dashboard() {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <button onClick={() => { const d = new Date(activeDate); d.setDate(d.getDate() - 1); const s = d.toISOString().slice(0, 10); if (s >= START_DATE) setActiveDate(s); }}
+              <button onClick={() => { const d = new Date(activeDate + "T12:00:00"); d.setDate(d.getDate() - 1); const s = d.toISOString().slice(0, 10); if (s >= START_DATE) setActiveDate(s); }}
                 style={{ background: "#111", border: "1px solid #1d1d1d", color: "#555", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 15 }}>‹</button>
               <div style={{ flex: 1, textAlign: "center" }}>
                 <div style={{ fontSize: 14, fontWeight: 700 }}>
@@ -665,7 +667,7 @@ export default function Dashboard() {
                 </div>
                 {!isToday && <button onClick={() => setActiveDate(today)} style={{ fontSize: 10, color: "#F5A623", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 2 }}>→ Back to today</button>}
               </div>
-              <button onClick={() => { const d = new Date(activeDate); d.setDate(d.getDate() + 1); const s = d.toISOString().slice(0, 10); if (s <= END_DATE) setActiveDate(s); }}
+              <button onClick={() => { const d = new Date(activeDate + "T12:00:00"); d.setDate(d.getDate() + 1); const s = d.toISOString().slice(0, 10); if (s <= END_DATE) setActiveDate(s); }}
                 style={{ background: "#111", border: "1px solid #1d1d1d", color: "#555", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 15 }}>›</button>
             </div>
 
